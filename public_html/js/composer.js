@@ -1,7 +1,8 @@
 (function($) {
 	
-        info = {id: null, id_lista_elementi:"moduli", id_drop_zone:"struttura"};        
-	opz = {title: 'aAS', onEndStart:null};
+        info = {id: null, id_lista_elementi:"moduli", id_drop_zone:"struttura"};  
+        
+	opz = {title: 'aAS222', onEndStart:null};
         var numero_elemento = 0;
         var id_selezionato = "";
         var tipologia_elemento_selezionato = "";
