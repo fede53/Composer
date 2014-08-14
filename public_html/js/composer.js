@@ -1,112 +1,152 @@
 (function($) {
+// VARIABILI PER SELEZIONARE L'ELEMENTO    
+    var id_selezionato = "";
+    var tipologia_elemento_selezionato = "";       
+    var macro_elemento_selezionato = "";
+    
+// ARRAY GENERALE DELLE GRIGLIE, DELLE DROP ZONE E DEGLI ELEMENTI DROPPATI
+    var griglie_droppate = new Array(); 
+    var drop_zone = new Array();
+    var elementi_droppati = new Array();
+    
+    info = {id: null, id_lista_elementi: "moduli", id_drop_zone: "struttura", id_dialog: "dialog"};
+    diciture = {trascina: "Trascina qui gli elementi che vuoi inserire"};
 
-        info = {id: null, id_lista_elementi: "moduli", id_drop_zone: "struttura"};
-        opz = {};
-
-        var numero_elemento = 0;
-        var id_selezionato = "";
-        var tipologia_elemento_selezionato = "";
-        var tipi_elementi = new Array();
-        tipi_elementi['immagine'] = new Array("Info immagine", "500");
-
-        elementi = {"Grigle": {
-                        "griglia1x1": {
-                                tipo: "griglia1x1",
-                                classe: "griglie"
-                        },
-                        "griglia1x2": {
-                                tipo: "griglia1x2",
-                                classe: "griglie"
-                        },
-                        "griglia1x3": {
-                                tipo: "griglia1x3",
-                                classe: "griglie"
-                        }
+// MACRO CATEGORIE     
+    macro_elementi = { 
+            griglie : { 
+                dicitura : "Grigle",
+                classe_accettate : ".griglie"
+            },
+            componenti : { 
+                dicitura : "Componenti"
+            }          
+    };
+    
+// ELEMENTI DRAGGABILI
+    elementi = {
+                "griglia1x1": {
+                        tipo: "griglia1x1",
+                        macro_elemento: "griglie",
+                        drop_zone: 1,
+                        classe_accettate : ".componenti"
                 },
-                "Elementi grafici": {
-                        "immagine": {
-                                tipo: "immagine",
-                                classe: "elementi"
+                "griglia1x2": {
+                        tipo: "griglia1x2",
+                        macro_elemento: "griglie",
+                        drop_zone: 2,
+                        classe_accettate : ".componenti"
+                },
+                "griglia1x3": {
+                        tipo: "griglia1x3",
+                        macro_elemento: "griglie",
+                        drop_zone: 3,
+                        classe_accettate : ".componenti"
+                },
+                "immagine": {
+                        tipo: "immagine",
+                        macro_elemento: "componenti",
+                        titolo_modale: "Info immagine",
+                        larghezza: "500",
+                        form : {
+                            "src" : { 
+                                    label_txt : "Src", 
+                                    type : "input", 
+                                    name : "src", 
+                                    id : "src"  },
+                            "altezza" : { 
+                                    label_txt : "Altezza", 
+                                    type : "input", 
+                                    name : "altezza", 
+                                    id : "altezza"}
                         }
-                }};
-
-
-
-        $.fn.Composer = function() {
-                info.id = this;
-                if (typeof arguments[0] == 'string') {
-                        switch (arguments[0]) {
-                                case 'start':
-                                        start();
-                                        break;
-                        }
                 }
-                else if (typeof arguments[0] == 'object') {
-                        opz = $.extend({}, opz, arguments[0]);
-                }
-                else if (typeof arguments[0] == 'string' && typeof arguments[1] == 'string') {
-                        opz2 = {}
-                        opz2[arguments[0]] = arguments[1];
-                        opz = $.extend({}, opz, opz2);
-                }
-                else if (typeof arguments[0] == 'function') {
-                        arguments[0]();
-                }
+            }; 
 
-                start();
-        }
-
+$.fn.Composer = function() {
+        info.id = this;
+        start();
+}
+        
+//AVVIO DEL COMPOSER 
         start = function() {
                 build_structure();
-
-                if (typeof opz.onEndStart == 'function') {
-                        opz.onEndStart();
-                }
         }
 
-
+// CREAZIONE DEGLI ELEMENTI CHE COMPONGONO IL COMPOSER
         build_structure = function() {
-
-                HTML_composer = "<div id=\"" + info.id_lista_elementi + "\">";
-
-                for (var key in elementi) {
-
-                        HTML_composer += "<h2><a href=\"#\">" + key + "</a></h2>";
-                        HTML_composer += "<div><ul>";
-
-                        for (var key_child in elementi[key]) {
-
-                                HTML_composer += "<li id=\"" + elementi[key][key_child].tipo + "\" class=\"" + elementi[key][key_child].classe + "\">" + key_child + "</li>";
-
-                        }
-                        HTML_composer += "</ul></div>";
-
+                
+                console.log('build_structure');                 
+                
+                // COSTRUZIONE ACCORDION SX PER LA SELEZIONE DEGLI ELEMENTI DRAGGABILI 
+                $("<div/>").attr("id",info.id_lista_elementi).appendTo(info.id);
+                               
+                for (var key in macro_elementi) {                    
+                        $("<a />").text(macro_elementi[key].dicitura).attr("href","#").appendTo("#"+info.id_lista_elementi).wrap("<h2 />");
+                        $("<ul />").attr("id", key).appendTo("#"+info.id_lista_elementi).wrap("<div />");
+                }        
+                        
+                for (var key_child in elementi) {                                                 
+                        $("<li />").attr("id", elementi[key_child].tipo)
+                                   .attr("class", elementi[key_child].macro_elemento)
+                                   .attr("macro_elemento", elementi[key_child].macro_elemento)
+                                   .text(key_child)
+                                   .appendTo("#"+elementi[key_child].macro_elemento);
                 }
-
-                HTML_composer += "</div>";
-
-
-                HTML_composer += "<div id=\"" + info.id_drop_zone + "\"><ol></ol></div>";
-
-                HTML_composer += "<div id=\"dialog\"><form id=\"myform\"><div id=\"form_elementi\"></div></form></div>";
-
-                $(info.id).html(HTML_composer);
-
+                
+                // CREAZIONE ELEMENTO PER IL DROP DEI VARI ELEMENTI    
+                $("<div />").attr("id",info.id_drop_zone).appendTo(info.id);
+                $("<ol />").appendTo("#"+info.id_drop_zone);
+                
+                // FINESTRA DIALOGO
+                $("<div />").attr("id",info.id_dialog).appendTo(info.id);
+                $("<form />").appendTo("#"+info.id_dialog);               
+               
+                
                 check_elementi();
 
-                $("#moduli").accordion();
+                $("#"+info.id_lista_elementi).accordion();
 
-                $("#moduli ul > li").draggable({
+                $("#"+info.id_lista_elementi+" ul > li").draggable({
                         appendTo: "body",
                         helper: "clone"
                 });
 
-                $("#struttura ol").droppable({
+                $("#"+info.id_drop_zone+" ol").droppable({
                         activeClass: "",
                         hoverClass: "place-holder-hover",
-                        accept: ".griglie",
+                        accept: macro_elementi.griglie.classe_accettate,
                         drop: function(event, ui) {
-                                $("" + struttura_moduli(ui.draggable.attr("id")) + "").appendTo(this);
+                                                                            
+                                console.log("drop "+ui.draggable.attr("id"));
+                                
+                                // SCRIVO NELL'ARRAY "griglie_droppate" E INSERISCO LA STRUTTURA HTML 
+                                ordine = griglie_droppate.length;
+                                nuovo_elemento = {ordine : ordine,
+                                                  id : "griglia_"+ordine,
+                                                  tipo : ui.draggable.attr("id"),
+                                                  macro_elemento : ui.draggable.attr("macro_elemento")                                                   
+                                                 };                                 
+                                griglie_droppate.push(nuovo_elemento); 
+                                
+                                $("<li />").addClass("sortable").attr("id","griglia_"+ordine).appendTo(this);
+                                
+                                // SCRIVO NELL'ARRAY "drop_zone" E INSERISCO LA STRUTTURA HTML
+                                if(elementi[ui.draggable.attr("id")].drop_zone>0){
+                                    $("<ol />").addClass(ui.draggable.attr("id")).appendTo("#griglia_"+ordine);   
+                                    for(i=0; i<elementi[ui.draggable.attr("id")].drop_zone; i++){
+                                        nuovo_elemento = {ordine : drop_zone.length,
+                                                          id : "drop_zone_"+drop_zone.length,
+                                                          griglia_appartenenza : ordine                                                 
+                                                         };                                                                                   
+                                        $("<li />").addClass("droppable").attr("id","drop_zone_"+drop_zone.length).appendTo("#griglia_"+ordine+" ol");
+                                        drop_zone.push(nuovo_elemento);  
+                                    }   
+                                }                             
+                               
+                                console.log(griglie_droppate);
+                                console.log(drop_zone);
+                                
                                 check_elementi();
                                 afterDrop();
                         }
@@ -121,95 +161,73 @@
 
 
                 dialog = $("#dialog-form").dialog({autoOpen: false, modal: true});
-
         }
+        
+// AZIONE DOPO IL DROP DEGLI ELEMENTI
+        afterDrop = function(id) {
+            
+            // SCRIVO NELL'ARRAY "elementi_droppati" E INSERISCO LA STRUTTURA HTML
+            for (var key_child in elementi){
+                
+                if(elementi[key_child].macro_elemento=="griglie"){
+                    
+                    $("."+elementi[key_child].tipo+" .droppable").droppable({
+                            activeClass: "",
+                            hoverClass: "place-holder-elementi-hover",
+                            accept: elementi[key_child].classe_accettate,
+                            drop: function(event, ui) {
 
+                                    console.log("drop "+ui.draggable.attr("id"));
+                                    ordine = elementi_droppati.length;    
+                                    nuovo_elemento = {id : "elemento_"+ordine,
+                                                      drop_zone: $(this).attr("id"),
+                                                      tipo : ui.draggable.attr("id")                                                 
+                                                     };                                 
+                                    elementi_droppati.push(nuovo_elemento); 
+                                    console.log(elementi_droppati);
 
+                                    $(struttura_moduli(ui.draggable.attr("id")), ordine).appendTo(this);                       
 
+                                    check_elementi();
+                                    afterDrop();
+                            }
 
+                    });   
+                } 
+            }
+        }  
 
-
-
-
+// AZIONE DOPO IL DROP DEGLI ELEMENTI
         check_elementi = function() {
                 num_elementi = $("#" + info.id_drop_zone + " ol li[class!=placeholder]").length;
                 if (num_elementi > 0)
                         $("#" + info.id_drop_zone + " ol").find(".placeholder").remove();
                 else
-                        $("#" + info.id_drop_zone + " ol").html("<li class='placeholder'>Trascina qui gli elementi che vuoi inserire</li>");
+                        $("#" + info.id_drop_zone + " ol").html("<li class='placeholder'>"+diciture.trascina+"</li>");
         }
 
 
-
-        struttura_moduli = function(id) {
-
+// AZIONE DOPO IL DROP DEGLI ELEMENTI
+        struttura_moduli = function(id, numero_elemento) {
                 var html_struttura_moduli;
-
                 var html_puls = "<div class='controls clearfix'><a href='#' class='sort'>+</a><a href='#' class='delete'>cancella</a></div>";
-
                 var html_puls_elementi = "<div class='controls_elementi clearfix'><a href='#' class='edit_elementi'>modifica</a><a href='#' class='delete_elementi'>cancella</a></div>";
-
                 switch (id) {
-                        case "griglia1x1":
-                                html_struttura_moduli = "<li class='sortable'>" + html_puls + "<ol class='griglia1x1'><li class='droppable'></li></ol></li>";
-                                break;
-                        case "griglia1x2":
-                                html_struttura_moduli = "<li class='sortable'>" + html_puls + "<ol class='griglia1x2 clearfix'><li class='droppable'></li><li class='droppable'></li></ol></li>";
-                                break;
-                        case "griglia1x3":
-                                html_struttura_moduli = "<li class='sortable'>" + html_puls + "<ol class='griglia1x3 clearfix'><li class='droppable'></li><li class='droppable'></li><li class='droppable'></li></ol></li>";
-                                break;
                         case "immagine":
-                                html_struttura_moduli = "<div id='elemento" + numero_elemento + "' class='img_placeholder' title='immagine'>" + html_puls_elementi + "</div>";
+                                html_struttura_moduli = "<div id='elemento_" + numero_elemento + "' class='img_placeholder' title='immagine'>" + html_puls_elementi + "</div>";
                                 numero_elemento++;
-                                break;
-
+                        break;
                 }
-
                 return html_struttura_moduli;
-        }
-
-
-        afterDrop = function(id) {
-
-                $(".delete").click(function() {
-                        $(this).parents('li').remove();
-                        check_elementi();
-                });
-
-                $(".edit_elementi").click(function() {
-                        id_selezionato = $(this).parents('div').parents('div').attr("id");
-                        tipologia_elemento_selezionato = $(this).parents('div').parents('div').attr("title");
-                        open_dialog();
-                });
-
-                $(".delete_elementi").click(function() {
-                        $(this).parents('li').remove();
-                        check_elementi();
-                });
-
-
-                $(".droppable").droppable({
-                        activeClass: "",
-                        hoverClass: "place-holder-elementi-hover",
-                        accept: ".elementi",
-                        drop: function(event, ui) {
-                                $("" + struttura_moduli(ui.draggable.attr("id")) + "").appendTo(this);
-                                check_elementi();
-                                afterDrop();
-                        }
-
-                });
-
         }
 
 // APRO FINESTRA DI DIALOGO A SECONDA DELL'ELEMENTO
         open_dialog = function() {
-                dialog.dialog("option", "title", tipi_elementi[tipologia_elemento_selezionato][0]);
+                dialog.dialog("option", "title", elementi["Elementi grafici"][tipologia_elemento_selezionato].titolo_modale);
 
                 carica_form();
 
-                dialog.dialog("option", "width", tipi_elementi[tipologia_elemento_selezionato][1]);
+                dialog.dialog("option", "width", elementi["Elementi grafici"][tipologia_elemento_selezionato].larghezza);
                 dialog.dialog("option", "buttons", [{text: "Salva", click: function() {
                                         salva_form();
                                         $(this).dialog("close");
@@ -244,9 +262,6 @@
                         }
                 });
         }
-
-// FUNZIONE LANCIATA DOPO IL DROP DELLE GRIGLIE
-
 
 // FUNZIONE CHE SCORRE IL FORM E PRENDE I VALORI PER LE FUNZIONI AJAX
         carica_parametri = function(form) {
@@ -288,8 +303,4 @@
                 return  parametri;
 
         }
-
-
-
-
 })(jQuery);

@@ -37,10 +37,10 @@ h1 { padding: .2em; margin: 0; }
 .img_placeholder{ width:100%; background-image:url(../images/pictures.png); background-position:center center; background-repeat:no-repeat; height:300px; position:relative; }
 
 
-.clearfix:before, .clearfix:after{
+.clearfix:before, .clearfix:after, .griglia1x2:before, .griglia1x2:after, .griglia1x3:before, .griglia1x3:after{
 	content: " ";
 	display: table;
 }
-.clearfix:after{
+.clearfix:after,.griglia1x2:after,.griglia1x3:after{
 	clear: both;
 }
