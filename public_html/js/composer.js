@@ -12,7 +12,9 @@
     
     info = {id: null, id_lista_elementi: "moduli", id_drop_zone: "struttura", id_dialog: "dialog"};
     opz = {debug_mode: true, debug_single_action: true};
-    diciture = {trascina: "Trascina qui gli elementi che vuoi inserire"};
+    diciture = {trascina: "Trascina qui gli elementi che vuoi inserire", 
+                ins_titolo: "Inserisci qui il tuo titolo", 
+                ins_testo: "Inserisci qui il tuo testo"};
     
 // MACRO CATEGORIE     
     macro_elementi = { 
@@ -77,6 +79,54 @@
                                 classe : "delete"
                             }                            
                         } 
+                },
+                "titolo": {
+                        tipo: "titolo",
+                        macro_elemento: "componenti",
+                        titolo_modale: "Titolo",
+                        larghezza: "500",
+                        classe_controls : "controls_elementi",
+                        controls : {
+                            sort : {
+                                testo : "modifica",
+                                classe : "edit"
+                            },
+                            cancella : {
+                                testo : "cancella",
+                                classe : "delete"
+                            }                            
+                        },
+                        form : {
+                            "titolo" : { 
+                                    label_txt : "Titolo", 
+                                    type : "input", 
+                                    name : "titolo", 
+                                    id : "titolo"  }
+                        }
+                },
+                "testo": {
+                        tipo: "testo",
+                        macro_elemento: "componenti",
+                        titolo_modale: "Testo",
+                        larghezza: "500",
+                        classe_controls : "controls_elementi",
+                        controls : {
+                            sort : {
+                                testo : "modifica",
+                                classe : "edit"
+                            },
+                            cancella : {
+                                testo : "cancella",
+                                classe : "delete"
+                            }                            
+                        },
+                        form : {
+                            "testo" : { 
+                                    label_txt : "Testo", 
+                                    type : "textarea", 
+                                    name : "testo", 
+                                    id : "testo"  }
+                        }
                 },
                 "immagine": {
                         tipo: "immagine",
@@ -213,8 +263,6 @@ $.fn.Composer = function() {
                                 
                             }
                         }
-,
-                                                          'valore' : ""
                 }).sortable({
                         items: "li.sortable:not(.placeholder)",
                         handle: ".sort",
@@ -410,13 +458,19 @@ $.fn.Composer = function() {
 
 
 // STRUTTURA MODULI
-        struttura_moduli = function(id, numero_elemento, macro_elemento) {
+        struttura_moduli = function(tipo, numero_elemento, macro_elemento) {
                 
                 var html_struttura_moduli;
                 
-                switch (id) {
+                switch (tipo) {
+                        case "titolo":
+                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" "+macro_elemento+"_"+tipo+"'><h1>"+diciture.ins_titolo+"</h1></div>";
+                        break;
+                        case "testo":
+                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" "+macro_elemento+"_"+tipo+"'><div>"+diciture.ins_testo+"</div></div>";
+                        break;                         
                         case "immagine":
-                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" img_placeholder' title='immagine'></div>";
+                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" "+macro_elemento+"_"+tipo+" img_placeholder' title='immagine'></div>";
                         break;
                 }
                 return html_struttura_moduli;
@@ -464,6 +518,9 @@ $.fn.Composer = function() {
                             case "input":
                                 append += "<input value='"+((typeof elementi_droppati[posizione]["valore"][elementi[tipo].form[key_child].name] !== 'undefined')? elementi_droppati[posizione]["valore"][elementi[tipo].form[key_child].name] : '' )+"' name='"+elementi[tipo].form[key_child].name+"' id='"+elementi[tipo].form[key_child].id+"' type='"+elementi[tipo].form[key_child].type+"' />";    
                             break;
+                            case "textarea":
+                                append += "<textarea name='"+elementi[tipo].form[key_child].name+"' id='"+elementi[tipo].form[key_child].id+"' type='"+elementi[tipo].form[key_child].type+"'>"+((typeof elementi_droppati[posizione]["valore"][elementi[tipo].form[key_child].name] !== 'undefined')? elementi_droppati[posizione]["valore"][elementi[tipo].form[key_child].name] : '' )+"</textarea>";    
+                            break;                            
                             
                         }
                     }                
@@ -507,6 +564,14 @@ $.fn.Composer = function() {
             tipo = elementi_droppati[posizione]['tipo'];
 
             switch(tipo){
+                case "titolo":
+                    if(elementi_droppati[posizione]["valore"]['titolo']) $('#'+id_selezionato+' h1').html(elementi_droppati[posizione]["valore"]['titolo']);
+                    else $('#'+id_selezionato+' h1').html(diciture.ins_titolo);                    
+                break; 
+                case "testo":
+                    if(elementi_droppati[posizione]["valore"]['testo']) $('#'+id_selezionato+' div').first().html(elementi_droppati[posizione]["valore"]['testo']);
+                    else $('#'+id_selezionato+' div').first().html(diciture.ins_testo);                    
+                break;                
                 case "immagine":
                     if(elementi_droppati[posizione]["valore"]['src']){
                         $('#'+id_selezionato).removeClass('img_placeholder');

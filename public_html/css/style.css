@@ -10,7 +10,7 @@ h1 { padding: .2em; margin: 0; }
 .place-holder-hover{ background: rgba(221,221,221,0.4) }
 .place-holder-elementi-hover{ background: rgba(255,255,204,0.4) }
 
-.controls_elementi  { position: absolute; right:10px; bottom:10px; } 
+.controls_elementi  { position: absolute; right:10px; bottom:10px; z-index:10;} 
 .controls_elementi a  { display:block; background-color:#FFF; line-height:18px; border:1px solid #ddd; margin-left:10px; float:left; padding:0 15px; text-decoration:none;}
 
 .griglia1x1{ list-style-type:none; margin:0; padding:0; } 
@@ -23,6 +23,9 @@ h1 { padding: .2em; margin: 0; }
 .griglia1x3{ list-style-type:none; margin:0; padding:0; } 
 .griglia1x3 li{width: 32.3333%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; border:1px solid #ddd; float:left; margin-right:1%;  } 
 .griglia1x3 li:nth-child(3n + 0){ width: 33.3333%; float:right; margin-right:0;} 
+#struttura .componenti{ position: relative; border: 1px dotted #ddd;  }
+.componenti_titolo { height: 70px; }
+.componenti_testo { min-height: 70px; }
 
 .cover {
 	background: no-repeat center center;
