@@ -32,9 +32,10 @@ h1 { padding: .2em; margin: 0; }
 	-o-background-size: cover;
 	background-size: cover;
 	z-index:-1;
+        -webkit-box-sizing: border-box; -moz-box-sizing: border-box;box-sizing: border-box; position:relative; 
 }
 
-.img_placeholder{ width:100%; background-image:url(../images/pictures.png); background-position:center center; background-repeat:no-repeat; height:300px; position:relative; }
+.img_placeholder{ width:100%; background-image:url(../images/pictures.png); -webkit-box-sizing: border-box; -moz-box-sizing: border-box;box-sizing: border-box; background-position:center center; background-repeat:no-repeat; height:300px; position:relative; }
 
 
 .clearfix:before, .clearfix:after, .griglia1x2:before, .griglia1x2:after, .griglia1x3:before, .griglia1x3:after, .controls:before, .controls:after{
