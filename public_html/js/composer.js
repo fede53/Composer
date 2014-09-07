@@ -88,6 +88,10 @@
                         classe_controls : "controls_elementi",
                         controls : {
                             sort : {
+                                testo : "+",
+                                classe : "sort_componenti"
+                            },
+                            modifica : {
                                 testo : "modifica",
                                 classe : "edit"
                             },
@@ -112,6 +116,10 @@
                         classe_controls : "controls_elementi",
                         controls : {
                             sort : {
+                                testo : "+",
+                                classe : "sort_componenti"
+                            },
+                            modifica : {
                                 testo : "modifica",
                                 classe : "edit"
                             },
@@ -136,6 +144,10 @@
                         classe_controls : "controls_elementi",
                         controls : {
                             sort : {
+                                testo : "+",
+                                classe : "sort_componenti"
+                            },
+                            modifica : {
                                 testo : "modifica",
                                 classe : "edit"
                             },
@@ -213,7 +225,7 @@ $.fn.Composer = function() {
                         accept: macro_elementi.griglie.classe_accettate,
                         drop: function(event, ui) {
                                 
-                                if(!ui.draggable.hasClass( "sortable" )){
+                                if(!ui.draggable.hasClass( "sortable") && !ui.draggable.hasClass( "sortable_componenti")){
                        
                                 // SCRIVO NELL'ARRAY "griglie_droppate" E INSERISCO LA STRUTTURA HTML 
                                 id_n = contatore_griglie_droppate;                                                    
@@ -221,13 +233,15 @@ $.fn.Composer = function() {
                                 macro_elemento = ui.draggable.attr("macro_elemento");
                                 id_elemento = macro_elemento+"_"+id_n;
                                 tipo = ui.draggable.attr("id");
+                                drop_zone = elementi[tipo].drop_zone;
                                 contatore_griglie_droppate++;
                                 
                                 
                                 griglie_droppate[id_n]= { 'ordine' : ordine,
                                                           'id' : id_elemento,
                                                           'tipo': tipo,
-                                                          'macro_elemento' : macro_elemento
+                                                          'macro_elemento' : macro_elemento,
+                                                          'drop_zone' : drop_zone
                                                         };
                                 
                                 if(opz.debug_single_action) console.log("drop "+id_elemento);
@@ -266,7 +280,9 @@ $.fn.Composer = function() {
                 }).sortable({
                         items: "li.sortable:not(.placeholder)",
                         handle: ".sort",
-                        update: function() {                               
+                        update: function() {  
+                            
+                            console.log("sas");
                                 $(this).removeClass("ui-state-default");
                                 arrayId = $(this).sortable( "toArray" );
                                 
@@ -301,6 +317,7 @@ $.fn.Composer = function() {
                             accept: elementi[key_child].classe_accettate,
                             drop: function(event, ui) {
 
+                                    if(!ui.draggable.hasClass( "sortable") && !ui.draggable.hasClass( "sortable_componenti")){                                    
                                     
                                     id_n = contatore_elementi_droppati;                                   
                                     macro_elemento = ui.draggable.attr("macro_elemento");
@@ -344,9 +361,84 @@ $.fn.Composer = function() {
                                         }
                                     }
                                     azioniPulsanti(id_elemento, macro_elemento, griglia);
+                                    }
 
                             }
+                    }).sortable({
+                        items: ".sortable_componenti",
+                        handle: ".sort_componenti",
+                        connectWith: ".drop_zone",
+                                
+                                start: function(event, ui) {
+                                    if (this === ui.item.parent()[0]) {
+                                    item = ui.item;
+                                    drop_zone_partenza = ui.item.parent().attr('drop_zone');
+                                    }
+                                },
+                                update: function(event, ui) { 
+                                    if (this === ui.item.parent()[0]) {                                       
+                                    
+                                    id_elemento = item.attr('id');                                    
+                                    drop_zone_destinazione = ui.item.parent().attr('drop_zone');
+                                    griglia_destinazione = ui.item.parent().parent().parent().attr("id");  
+                                    
+                                    posizione = trova_posizione(elementi_droppati,id_elemento);
+                                    griglia_partenza = elementi_droppati[posizione]['griglia']; 
+                                    
+                                    // ASSEGNO NUOVA GRIGLIA E NUOVA DROP_ZONE
+                                    elementi_droppati[posizione]['griglia'] = griglia_destinazione;
+                                    elementi_droppati[posizione]['drop_zone'] = drop_zone_destinazione;
+                                    
+                                    arrayId = $("#"+griglia_partenza+" ol li[drop_zone="+drop_zone_partenza+"]").sortable( "toArray" );                                    
+                                    console.log(arrayId);   
+                                    
+                                    // RIASSEGNO ORDINE                           
+                                    if(elementi_droppati.length>0){
+                                        assegna=0;
+                                        for(a=0; a<arrayId.length; a++){                                            
+                                            for(y=0; y<elementi_droppati.length;y++){
+                                                if(typeof elementi_droppati[y] !== 'undefined') {
+                                                    if(griglia_destinazione==elementi_droppati[y]['griglia'] && drop_zone_destinazione==elementi_droppati[y]['drop_zone'] && arrayId[a]==elementi_droppati[y]['id']){
+                                                        elementi_droppati[y]['ordine'] = assegna;  
+                                                        assegna++;
+                                                    } 
 
+                                                }                                          
+                                            } 
+                                        }
+                                    }
+                                    
+                                    arrayId = $("#"+griglia_destinazione+" ol li[drop_zone="+drop_zone_destinazione+"]").sortable( "toArray" );                                    
+                                    console.log(arrayId);                                          
+                                     // RIASSEGNO ORDINE     
+                                    if(elementi_droppati.length>0){
+                                        assegna=0;
+                                        for(a=0; a<arrayId.length; a++){
+                                            for(y=0; y<elementi_droppati.length;y++){
+                                                if(typeof elementi_droppati[y] !== 'undefined') {
+
+                                                    if(griglia_destinazione==elementi_droppati[y]['griglia'] && drop_zone_destinazione==elementi_droppati[y]['drop_zone'] && arrayId[a]==elementi_droppati[y]['id']){
+                                                        elementi_droppati[y]['ordine'] = assegna;  
+                                                        assegna++;
+                                                    } 
+
+                                                }                                          
+                                            }
+                                        }
+                                    }                                 
+  
+                                    
+                                    
+                                    
+                                    if(opz.debug_mode){
+                                        console.log(griglie_droppate); 
+                                        console.log(elementi_droppati);
+                                    }  
+                                    }
+                                    
+                                }
+                                                       
+   
                     });   
                 } 
             } 
@@ -464,13 +556,13 @@ $.fn.Composer = function() {
                 
                 switch (tipo) {
                         case "titolo":
-                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" "+macro_elemento+"_"+tipo+"'><h1>"+diciture.ins_titolo+"</h1></div>";
+                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" "+macro_elemento+"_"+tipo+" sortable_componenti'><h1>"+diciture.ins_titolo+"</h1></div>";
                         break;
                         case "testo":
-                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" "+macro_elemento+"_"+tipo+"'><div>"+diciture.ins_testo+"</div></div>";
+                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" "+macro_elemento+"_"+tipo+" sortable_componenti'><div>"+diciture.ins_testo+"</div></div>";
                         break;                         
                         case "immagine":
-                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" "+macro_elemento+"_"+tipo+" img_placeholder' title='immagine'></div>";
+                                html_struttura_moduli = "<div id='"+macro_elemento+"_" + numero_elemento + "' class='"+macro_elemento+" "+macro_elemento+"_"+tipo+" img_placeholder sortable_componenti' title='immagine'></div>";
                         break;
                 }
                 return html_struttura_moduli;
@@ -497,7 +589,14 @@ $.fn.Composer = function() {
                     }                    
                 }
                 return elementi;
-        }       
+        }  
+        
+        array_search = function(ricerco, array) {
+            for(var i in array) {
+                if(array[i] == ricerco) return true;
+            }
+            return false;
+        }
         
 
 // APRO FINESTRA DI DIALOGO A SECONDA DELL'ELEMENTO
